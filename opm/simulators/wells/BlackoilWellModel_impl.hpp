@@ -312,7 +312,9 @@ namespace Opm {
     void
     BlackoilWellModel<TypeTag>::
     beginTimeStep() {
-
+        const int reportStepIdx = ebosSimulator_.episodeIndex();
+        this->beginReportStep(reportStepIdx);
+        /*
         Opm::DeferredLogger local_deferredLogger;
 
         well_state_ = previous_well_state_;
@@ -396,6 +398,14 @@ namespace Opm {
 
         // compute wsolvent fraction for REIN wells
         updateWsolvent(fieldGroup, schedule(), reportStepIdx,  well_state_);
+
+        */
+        for (const auto& ecl_well : this->wells_ecl_) {
+            const auto& well = schedule().getWell(ecl_well.name(), reportStepIdx);
+            printf("Looking at ecl_well: %s status: %s/%s \n", ecl_well.name().c_str(),
+                   Well::Status2String(ecl_well.getStatus()).c_str(),
+                   Well::Status2String(well.getStatus()).c_str());
+        }
     }
 
 

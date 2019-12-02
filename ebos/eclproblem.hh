@@ -104,10 +104,11 @@
 
 #include <boost/date_time.hpp>
 
-#include <set>
-#include <vector>
-#include <string>
 #include <algorithm>
+#include <chrono>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace Opm {
 template <class TypeTag>
@@ -966,8 +967,18 @@ public:
         }
 #endif // NDEBUG
 
-        const auto& simulator = this->simulator();
+        auto& simulator = this->simulator();
+        auto& schedule = simulator.vanguard().schedule();
         wellModel_.endTimeStep();
+
+        int episodeIdx = simulator.episodeIndex();
+        auto start_time = schedule.getStartTime();
+        if (episodeIdx > 1)
+        this->applyActions(episodeIdx,
+                           simulator.time() + simulator.timeStepSize(),
+                           schedule,
+                           simulator.vanguard().summaryState());
+
         if (enableAquifers_)
             aquiferModel_.endTimeStep();
         tracerModel_.endTimeStep();
@@ -997,6 +1008,7 @@ public:
 
         int episodeIdx = simulator.episodeIndex();
         this->applyActions(episodeIdx + 1,
+                           simulator.time() + simulator.timeStepSize(),
                            schedule,
                            simulator.vanguard().summaryState());
 
@@ -1036,7 +1048,7 @@ public:
         ParentType::writeOutput(verbose);
 
         bool isSubStep = !EWOMS_GET_PARAM(TypeTag, bool, EnableWriteAllSolutions) && !this->simulator().episodeWillBeOver();
-
+        printf("Calling writeOutput()\n");
         eclWriter_->evalSummaryState(isSubStep);
         if (enableEclOutput_)
             eclWriter_->writeOutput(isSubStep);
@@ -1044,6 +1056,7 @@ public:
 
 
     void applyActions(int reportStep,
+                      double sim_time,
                       Opm::Schedule& schedule,
                       const Opm::SummaryState& summaryState) {
         const auto& actions = schedule.actions(reportStep);
@@ -1051,6 +1064,16 @@ public:
             return;
 
         Opm::Action::Context context( summaryState );
+        auto now = Opm::TimeStampUTC( schedule.getStartTime() ) + std::chrono::duration<double>(sim_time);
+        std::string ts;
+        {
+            std::ostringstream os;
+            os << std::setw(4) <<                      std::to_string(now.year())  << '/'
+               << std::setw(2) << std::setfill('0') << std::to_string(now.month()) << '/'
+               << std::setw(2) << std::setfill('0') << std::to_string(now.day()) << "  report:" << std::to_string(reportStep);
+
+            ts = os.str();
+        }
 
         auto simTime = schedule.simTime(reportStep);
         for (const auto& action : actions.pending(simTime)) {
@@ -1063,11 +1086,11 @@ public:
                         wells_string += matching_wells[iw] + ", ";
                     wells_string += matching_wells.back();
                 }
-                std::string msg = "The action: " + action->name() + " evaluated to true at report step: " + std::to_string(reportStep) + " wells: " + wells_string;
+                std::string msg = "The action: " + action->name() + " evaluated to true at " + ts + " wells: " + wells_string;
                 Opm::OpmLog::info(msg);
                 schedule.applyAction(reportStep, *action, actionResult);
             } else {
-                std::string msg = "The action: " + action->name() + " evaluated to false at report step: " + std::to_string(reportStep);
+                std::string msg = "The action: " + action->name() + " evaluated to false at " + ts;
                 Opm::OpmLog::info(msg);
             }
         }
