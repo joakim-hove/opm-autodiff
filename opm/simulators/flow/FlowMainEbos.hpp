@@ -253,7 +253,14 @@ namespace Opm
                     return status;
 
                 setupParallelism();
-                setupEbosSimulator(output_cout);
+                {
+                    std::cout << "Running simulator setup code" << std::endl;
+                    auto start_time = std::chrono::system_clock::now();
+                    setupEbosSimulator(output_cout);
+                    auto setup_time = std::chrono::system_clock::now() - start_time;
+                    std::cout << "Simulator setup time: " << std::chrono::duration<double>(setup_time).count() << " seconds" << std::endl;
+                    std::exit(0);
+                }
                 runDiagnostics(output_cout);
                 createSimulator();
 
@@ -386,10 +393,21 @@ namespace Opm
 
         void setupEbosSimulator(bool output_cout)
         {
-            ebosSimulator_.reset(new EbosSimulator(/*verbose=*/false));
-            ebosSimulator_->executionTimer().start();
-            ebosSimulator_->model().applyInitialSolution();
+            {
+                auto start_time = std::chrono::system_clock::now();
+                ebosSimulator_.reset(new EbosSimulator(/*verbose=*/false));
+                auto new_time = std::chrono::system_clock::now() - start_time;
+                std::cout << "Simulator creation time: " << std::chrono::duration<double>(new_time).count() << " seconds" << std::endl;
+            }
 
+
+            ebosSimulator_->executionTimer().start();
+            {
+                auto start_time = std::chrono::system_clock::now();
+                ebosSimulator_->model().applyInitialSolution();
+                auto init_time = std::chrono::system_clock::now() - start_time;
+                std::cout << "Applyinitial Solution time: " << std::chrono::duration<double>(init_time).count() << " seconds" << std::endl;
+            }
             try {
                 if (output_cout) {
                     MissingFeatures::checkKeywords(deck());
