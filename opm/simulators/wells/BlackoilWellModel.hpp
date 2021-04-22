@@ -397,6 +397,7 @@ namespace Opm {
             void initPrimaryVariablesEvaluation() const;
             void updateWellControls(Opm::DeferredLogger& deferred_logger, const bool checkGroupControls);
             WellInterfacePtr getWell(const std::string& well_name) const;
+            const GroupState& groupState() const { return this->group_state; }
 
         protected:
             Simulator& ebosSimulator_;

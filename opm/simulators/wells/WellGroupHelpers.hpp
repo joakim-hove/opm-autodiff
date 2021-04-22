@@ -94,6 +94,7 @@ namespace WellGroupHelpers
                                     const GuideRate& guide_rate,
                                     const WellStateFullyImplicitBlackoil& wellStateNupcol,
                                     WellStateFullyImplicitBlackoil& wellState,
+                                    const GroupState& group_state,
                                     std::vector<double>& groupTargetReduction);
 
     template <class Comm>
@@ -103,6 +104,7 @@ namespace WellGroupHelpers
                                             const int reportStepIdx,
                                             const double& simTime,
                                             WellStateFullyImplicitBlackoil& wellState,
+                                            const GroupState& group_state,
                                             const Comm& comm,
                                             GuideRate* guideRate,
                                             std::vector<double>& pot)
@@ -113,11 +115,10 @@ namespace WellGroupHelpers
             const Group& groupTmp = schedule.getGroup(groupName, reportStepIdx);
 
             // Note that group effiency factors for groupTmp are applied in updateGuideRateForGroups
-            updateGuideRateForProductionGroups(
-                        groupTmp, schedule, pu, reportStepIdx, simTime, wellState, comm, guideRate, thisPot);
+            updateGuideRateForProductionGroups(groupTmp, schedule, pu, reportStepIdx, simTime, wellState, group_state, comm, guideRate, thisPot);
 
             // accumulate group contribution from sub group unconditionally
-            const Group::ProductionCMode& currentGroupControl = wellState.currentProductionGroupControl(groupName);
+            const auto currentGroupControl = group_state.production_control(groupName);
             if (currentGroupControl != Group::ProductionCMode::FLD
                     && currentGroupControl != Group::ProductionCMode::NONE) {
                 continue;
@@ -276,6 +277,7 @@ namespace WellGroupHelpers
     double getGuideRate(const std::string& name,
                         const Schedule& schedule,
                         const WellStateFullyImplicitBlackoil& wellState,
+                        const GroupState& group_state,
                         const int reportStepIdx,
                         const GuideRate* guideRate,
                         const GuideRateModel::Target target,
@@ -293,6 +295,7 @@ namespace WellGroupHelpers
 
     int groupControlledWells(const Schedule& schedule,
                              const WellStateFullyImplicitBlackoil& well_state,
+                             const GroupState& group_state,
                              const int report_step,
                              const std::string& group_name,
                              const std::string& always_included_child,
@@ -306,6 +309,7 @@ namespace WellGroupHelpers
         FractionCalculator(const Schedule& schedule,
                            const SummaryState& summary_state,
                            const WellStateFullyImplicitBlackoil& well_state,
+                           const GroupState& group_state,
                            const int report_step,
                            const GuideRate* guide_rate,
                            const GuideRateModel::Target target,
@@ -324,6 +328,7 @@ namespace WellGroupHelpers
         const Schedule& schedule_;
         const SummaryState& summary_state_;
         const WellStateFullyImplicitBlackoil& well_state_;
+        const GroupState& group_state_;
         int report_step_;
         const GuideRate* guide_rate_;
         GuideRateModel::Target target_;
@@ -337,6 +342,7 @@ namespace WellGroupHelpers
                                                      const std::string& parent,
                                                      const Group& group,
                                                      const WellStateFullyImplicitBlackoil& wellState,
+                                                     const GroupState& group_state,
                                                      const int reportStepIdx,
                                                      const GuideRate* guideRate,
                                                      const double* rates,
@@ -365,6 +371,7 @@ namespace WellGroupHelpers
                                                       const std::string& parent,
                                                       const Group& group,
                                                       const WellStateFullyImplicitBlackoil& wellState,
+                                                      const GroupState& group_state,
                                                       const int reportStepIdx,
                                                       const GuideRate* guideRate,
                                                       const double* rates,
