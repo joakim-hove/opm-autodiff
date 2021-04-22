@@ -3118,11 +3118,11 @@ namespace Opm {
         if ((grup_type == ::Opm::Group::GroupType::INJECTION) ||
             (grup_type == ::Opm::Group::GroupType::MIXED))
         {
-            if (this->wellState().hasInjectionGroupControl(::Opm::Phase::WATER, gname)) {
+            if (this->group_state.has_injection_control(gname, ::Opm::Phase::WATER)) {
                 cgc.currentWaterInjectionConstraint = this->wellState().currentInjectionGroupControl(::Opm::Phase::WATER, gname);
             }
 
-            if (this->wellState().hasInjectionGroupControl(::Opm::Phase::GAS, gname)) {
+            if (this->group_state.has_injection_control(gname, ::Opm::Phase::GAS)) {
                 cgc.currentGasInjectionConstraint = this->wellState().currentInjectionGroupControl(::Opm::Phase::GAS, gname);
             }
         }

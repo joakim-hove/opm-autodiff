@@ -72,7 +72,7 @@ namespace WellGroupHelpers
         // use NONE as default control
         const Phase all[] = {Phase::WATER, Phase::OIL, Phase::GAS};
         for (Phase phase : all) {
-            if (!wellState.hasInjectionGroupControl(phase, group.name())) {
+            if (!group_state.has_injection_control(group.name(), phase)) {
                 wellState.setCurrentInjectionGroupControl(phase, group.name(), Group::InjectionCMode::NONE);
             }
         }
