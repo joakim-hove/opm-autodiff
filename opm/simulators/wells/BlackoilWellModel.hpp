@@ -641,6 +641,8 @@ namespace Opm {
             WellState active_well_state_;
             WellState last_valid_well_state_;
             WellState nupcol_well_state_;
+
+            GroupState& group_state;
         };
 
 

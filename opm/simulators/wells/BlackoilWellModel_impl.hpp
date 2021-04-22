@@ -37,7 +37,8 @@ namespace Opm {
           phase_usage_(phaseUsageFromDeck(ebosSimulator_.vanguard().eclState())),
           active_well_state_(phase_usage_.num_phases),
           last_valid_well_state_(phase_usage_.num_phases),
-          nupcol_well_state_(phase_usage_.num_phases)
+          nupcol_well_state_(phase_usage_.num_phases),
+          group_state(active_well_state_.groupState())
     {
         terminal_output_ = false;
         if (ebosSimulator.gridView().comm().rank() == 0)
@@ -272,7 +273,7 @@ namespace Opm {
         }
 
         const Group& fieldGroup = schedule().getGroup("FIELD", timeStepIdx);
-        WellGroupHelpers::setCmodeGroup(fieldGroup, schedule(), summaryState, timeStepIdx, this->wellState());
+        WellGroupHelpers::setCmodeGroup(fieldGroup, schedule(), summaryState, timeStepIdx, this->wellState(), this->group_state);
 
         // Compute reservoir volumes for RESV controls.
         rateConverter_.reset(new RateConverterType (phase_usage_,
@@ -3110,8 +3111,8 @@ namespace Opm {
         cgc.currentWaterInjectionConstraint =
             ::Opm::Group::InjectionCMode::NONE;
 
-        if (this->wellState().hasProductionGroupControl(gname)) {
-            cgc.currentProdConstraint = this->wellState().currentProductionGroupControl(gname);
+        if (this->group_state.has_production_control(gname)) {
+            cgc.currentProdConstraint = this->group_state.production_control(gname);
         }
 
         if ((grup_type == ::Opm::Group::GroupType::INJECTION) ||

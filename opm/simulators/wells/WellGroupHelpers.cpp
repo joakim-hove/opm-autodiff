@@ -61,12 +61,12 @@ namespace WellGroupHelpers
                        const Schedule& schedule,
                        const SummaryState& summaryState,
                        const int reportStepIdx,
-                       WellStateFullyImplicitBlackoil& wellState)
+                       WellStateFullyImplicitBlackoil& wellState,
+                       const GroupState& group_state)
     {
 
         for (const std::string& groupName : group.groups()) {
-            setCmodeGroup(
-                schedule.getGroup(groupName, reportStepIdx), schedule, summaryState, reportStepIdx, wellState);
+            setCmodeGroup(schedule.getGroup(groupName, reportStepIdx), schedule, summaryState, reportStepIdx, wellState, group_state);
         }
 
         // use NONE as default control
@@ -76,7 +76,7 @@ namespace WellGroupHelpers
                 wellState.setCurrentInjectionGroupControl(phase, group.name(), Group::InjectionCMode::NONE);
             }
         }
-        if (!wellState.hasProductionGroupControl(group.name())) {
+        if (!group_state.has_production_control(group.name())) {
             wellState.setCurrentProductionGroupControl(group.name(), Group::ProductionCMode::NONE);
         }
 

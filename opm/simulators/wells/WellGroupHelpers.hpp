@@ -28,6 +28,7 @@
 #include <opm/simulators/utils/DeferredLoggingErrorHelpers.hpp>
 #include <opm/simulators/wells/VFPProdProperties.hpp>
 #include <opm/simulators/wells/WellStateFullyImplicitBlackoil.hpp>
+#include <opm/simulators/wells/GroupState.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -49,7 +50,8 @@ namespace WellGroupHelpers
                        const Schedule& schedule,
                        const SummaryState& summaryState,
                        const int reportStepIdx,
-                       WellStateFullyImplicitBlackoil& wellState);
+                       WellStateFullyImplicitBlackoil& wellState,
+                       const GroupState& group_state);
 
     void accumulateGroupEfficiencyFactor(const Group& group,
                                          const Schedule& schedule,
