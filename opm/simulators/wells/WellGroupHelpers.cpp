@@ -62,7 +62,7 @@ namespace WellGroupHelpers
                        const SummaryState& summaryState,
                        const int reportStepIdx,
                        WellStateFullyImplicitBlackoil& wellState,
-                       const GroupState& group_state)
+                       GroupState& group_state)
     {
 
         for (const std::string& groupName : group.groups()) {
@@ -77,7 +77,7 @@ namespace WellGroupHelpers
             }
         }
         if (!group_state.has_production_control(group.name())) {
-            wellState.setCurrentProductionGroupControl(group.name(), Group::ProductionCMode::NONE);
+            group_state.production_control(group.name(), Group::ProductionCMode::NONE);
         }
 
         const auto& events = schedule[reportStepIdx].wellgroup_events();
@@ -96,7 +96,7 @@ namespace WellGroupHelpers
         if (group.isProductionGroup()
             && events.hasEvent(group.name(), ScheduleEvents::GROUP_PRODUCTION_UPDATE)) {
             const auto controls = group.productionControls(summaryState);
-            wellState.setCurrentProductionGroupControl(group.name(), controls.cmode);
+            group_state.production_control(group.name(), controls.cmode);
         }
 
         if (schedule[reportStepIdx].gconsale().has(group.name())) {

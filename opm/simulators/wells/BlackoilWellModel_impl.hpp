@@ -1871,7 +1871,7 @@ namespace Opm {
                      const data::GroupAndNetworkValues& grpNwrkValues,
                      const PhaseUsage& phases,
                      const bool handle_ms_well,
-                     WellStateFullyImplicitBlackoil& state) const
+                     WellStateFullyImplicitBlackoil& well_state) const
     {
         using GPMode = Group::ProductionCMode;
         using GIMode = Group::InjectionCMode;
@@ -1892,28 +1892,28 @@ namespace Opm {
             phs.at( phases.phase_pos[BlackoilPhases::Vapour] ) = rt::gas;
         }
 
-        for( const auto& wm : state.wellMap() ) {
+        for( const auto& wm : well_state.wellMap() ) {
             const auto well_index = wm.second[ 0 ];
             const auto& rst_well = rst_wells.at( wm.first );
-            state.bhp()[ well_index ] = rst_well.bhp;
-            state.temperature()[ well_index ] = rst_well.temperature;
+            well_state.bhp()[ well_index ] = rst_well.bhp;
+            well_state.temperature()[ well_index ] = rst_well.temperature;
 
             if (rst_well.current_control.isProducer) {
-                state.currentProductionControls()[ well_index ] = rst_well.current_control.prod;
+                well_state.currentProductionControls()[ well_index ] = rst_well.current_control.prod;
             }
             else {
-                state.currentInjectionControls()[ well_index ] = rst_well.current_control.inj;
+                well_state.currentInjectionControls()[ well_index ] = rst_well.current_control.inj;
             }
 
             const auto wellrate_index = well_index * np;
             for( size_t i = 0; i < phs.size(); ++i ) {
                 assert( rst_well.rates.has( phs[ i ] ) );
-                state.wellRates()[ wellrate_index + i ] = rst_well.rates.get( phs[ i ] );
+                well_state.wellRates()[ wellrate_index + i ] = rst_well.rates.get( phs[ i ] );
             }
 
-            auto * perf_pressure = state.perfPress().data() + wm.second[1];
-            auto * perf_rates = state.perfRates().data() + wm.second[1];
-            auto * perf_phase_rates = state.perfPhaseRates().data() + wm.second[1]*np;
+            auto * perf_pressure = well_state.perfPress().data() + wm.second[1];
+            auto * perf_rates = well_state.perfRates().data() + wm.second[1];
+            auto * perf_phase_rates = well_state.perfPhaseRates().data() + wm.second[1]*np;
             const auto& perf_data = this->well_perf_data_[well_index];
 
             for (std::size_t perf_index = 0; perf_index < perf_data.size(); perf_index++) {
@@ -1932,7 +1932,7 @@ namespace Opm {
 
                 const WellSegments& segment_set = well_ecl.getSegments();
 
-                const int top_segment_index = state.topSegmentIndex(well_index);
+                const int top_segment_index = well_state.topSegmentIndex(well_index);
                 const auto& segments = rst_well.segments;
 
                 // \Note: eventually we need to hanlde the situations that some segments are shut
@@ -1943,11 +1943,11 @@ namespace Opm {
 
                     // recovering segment rates and pressure from the restart values
                     const auto pres_idx = Opm::data::SegmentPressures::Value::Pressure;
-                    state.segPress()[top_segment_index + segment_index] = segment.second.pressures[pres_idx];
+                    well_state.segPress()[top_segment_index + segment_index] = segment.second.pressures[pres_idx];
 
                     const auto& segment_rates = segment.second.rates;
                     for (int p = 0; p < np; ++p) {
-                        state.segRates()[(top_segment_index + segment_index) * np + p] = segment_rates.get(phs[p]);
+                        well_state.segRates()[(top_segment_index + segment_index) * np + p] = segment_rates.get(phs[p]);
                     }
                 }
             }
@@ -1959,15 +1959,15 @@ namespace Opm {
             const auto cwi = value.currentControl.currentWaterInjectionConstraint;
 
             if (cpc != GPMode::NONE) {
-                state.setCurrentProductionGroupControl(group, cpc);
+                this->group_state.production_control(group, cpc);
             }
 
             if (cgi != GIMode::NONE) {
-                state.setCurrentInjectionGroupControl(Phase::GAS, group, cgi);
+                well_state.setCurrentInjectionGroupControl(Phase::GAS, group, cgi);
             }
 
             if (cwi != GIMode::NONE) {
-                state.setCurrentInjectionGroupControl(Phase::WATER, group, cwi);
+                well_state.setCurrentInjectionGroupControl(Phase::WATER, group, cwi);
             }
         }
     }
@@ -2338,7 +2338,7 @@ namespace Opm {
     template<typename TypeTag>
     void
     BlackoilWellModel<TypeTag>::
-    checkGconsaleLimits(const Group& group, WellState& well_state, Opm::DeferredLogger& deferred_logger) const
+    checkGconsaleLimits(const Group& group, WellState& well_state, Opm::DeferredLogger& deferred_logger)
     {
         const int reportStepIdx = ebosSimulator_.episodeIndex();
          // call recursively down the group hiearchy
@@ -2419,11 +2419,11 @@ namespace Opm {
                 break;
             }
             case GConSale::MaxProcedure::RATE: {
-                    well_state.setCurrentProductionGroupControl(group.name(), Group::ProductionCMode::GRAT);
-                    ss << "Maximum GCONSALE limit violated for " << group.name() << ". The group is switched from ";
-                    ss << Group::ProductionCMode2String(oldProductionControl) << " to " << Group::ProductionCMode2String(Group::ProductionCMode::GRAT);
-                    ss << " and limited by the maximum sales rate after consumption and import are considered" ;
-                    well_state.setCurrentGroupGratTargetFromSales(group.name(), production_target);
+                this->group_state.production_control(group.name(), Group::ProductionCMode::GRAT);
+                ss << "Maximum GCONSALE limit violated for " << group.name() << ". The group is switched from ";
+                ss << Group::ProductionCMode2String(oldProductionControl) << " to " << Group::ProductionCMode2String(Group::ProductionCMode::GRAT);
+                ss << " and limited by the maximum sales rate after consumption and import are considered" ;
+                well_state.setCurrentGroupGratTargetFromSales(group.name(), production_target);
                 break;
             }
             default:
@@ -2490,7 +2490,7 @@ namespace Opm {
         }
         case Group::ExceedAction::RATE: {
             if (oldControl != newControl) {
-                well_state.setCurrentProductionGroupControl(group.name(), newControl);
+                this->group_state.production_control(group.name(), newControl);
                 ss << "Switching production control mode for group "<< group.name()
                    << " from " << Group::ProductionCMode2String(oldControl)
                    << " to " << Group::ProductionCMode2String(newControl);

@@ -589,7 +589,7 @@ namespace Opm {
             bool checkGroupConstraints(const Group& group, Opm::DeferredLogger& deferred_logger) const;
             Group::ProductionCMode checkGroupProductionConstraints(const Group& group, Opm::DeferredLogger& deferred_logger) const;
             Group::InjectionCMode checkGroupInjectionConstraints(const Group& group, const Phase& phase) const;
-            void checkGconsaleLimits(const Group& group, WellState& well_state, Opm::DeferredLogger& deferred_logger ) const;
+            void checkGconsaleLimits(const Group& group, WellState& well_state, Opm::DeferredLogger& deferred_logger );
 
             void updateGroupHigherControls(Opm::DeferredLogger& deferred_logger, std::set<std::string>& switched_groups);
             void checkGroupHigherConstraints(const Group& group, Opm::DeferredLogger& deferred_logger, std::set<std::string>& switched_groups);
