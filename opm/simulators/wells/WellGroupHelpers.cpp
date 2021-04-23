@@ -490,11 +490,12 @@ namespace WellGroupHelpers
                                     const Schedule& schedule,
                                     const int reportStepIdx,
                                     const WellStateFullyImplicitBlackoil& wellStateNupcol,
-                                    WellStateFullyImplicitBlackoil& wellState)
+                                    WellStateFullyImplicitBlackoil& wellState,
+                                    GroupState& group_state)
     {
         for (const std::string& groupName : group.groups()) {
             const Group& groupTmp = schedule.getGroup(groupName, reportStepIdx);
-            updateGroupProductionRates(groupTmp, schedule, reportStepIdx, wellStateNupcol, wellState);
+            updateGroupProductionRates(groupTmp, schedule, reportStepIdx, wellStateNupcol, wellState, group_state);
         }
         const int np = wellState.numPhases();
         std::vector<double> rates(np, 0.0);
@@ -502,7 +503,7 @@ namespace WellGroupHelpers
             rates[phase] = sumWellPhaseRates(
                 wellStateNupcol.wellRates(), group, schedule, wellState, reportStepIdx, phase, /*isInjector*/ false);
         }
-        wellState.setCurrentProductionGroupRates(group.name(), rates);
+        group_state.update_production_rates(group.name(), rates);
     }
 
 

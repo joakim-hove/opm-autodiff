@@ -251,7 +251,8 @@ namespace WellGroupHelpers
                                     const Schedule& schedule,
                                     const int reportStepIdx,
                                     const WellStateFullyImplicitBlackoil& wellStateNupcol,
-                                    WellStateFullyImplicitBlackoil& wellState);
+                                    WellStateFullyImplicitBlackoil& wellState,
+                                    GroupState& group_state);
 
     void updateREINForGroups(const Group& group,
                              const Schedule& schedule,

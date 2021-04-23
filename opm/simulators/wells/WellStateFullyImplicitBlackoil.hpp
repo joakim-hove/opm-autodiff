@@ -430,10 +430,6 @@ namespace Opm
             return this->well_rates.find(wellName) != this->well_rates.end();
         }
 
-        void setCurrentProductionGroupRates(const std::string& groupName, const std::vector<double>& rates ) {
-            this->group_state.update_production_rates(groupName, rates);
-        }
-
         const std::vector<double>& currentProductionGroupRates(const std::string& groupName) const {
             return this->group_state.production_rates(groupName);
         }
