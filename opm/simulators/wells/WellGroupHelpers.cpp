@@ -545,6 +545,7 @@ namespace WellGroupHelpers
     std::map<std::string, double>
     computeNetworkPressures(const Opm::Network::ExtNetwork& network,
                             const WellStateFullyImplicitBlackoil& well_state,
+                            const GroupState& group_state,
                             const VFPProdProperties& vfp_prod_props,
                             const Schedule& schedule,
                             const int report_time_step)
@@ -582,7 +583,7 @@ namespace WellGroupHelpers
         // from the corresponding groups.
         std::map<std::string, std::vector<double>> node_inflows;
         for (const auto& node : leaf_nodes) {
-            node_inflows[node] = well_state.currentProductionGroupRates(node);
+            node_inflows[node] = group_state.production_rates(node);
             // Add the ALQ amounts to the gas rates if requested.
             if (network.node(node).add_gas_lift_gas()) {
                 const auto& group = schedule.getGroup(node, report_time_step);
@@ -669,9 +670,9 @@ namespace WellGroupHelpers
     }
 
     GuideRate::RateVector
-    getProductionGroupRateVector(const WellStateFullyImplicitBlackoil& well_state, const PhaseUsage& pu, const std::string& group_name)
+    getProductionGroupRateVector(const GroupState& group_state, const PhaseUsage& pu, const std::string& group_name)
     {
-        return getGuideRateVector(well_state.currentProductionGroupRates(group_name), pu);
+        return getGuideRateVector(group_state.production_rates(group_name), pu);
     }
 
     double getGuideRate(const std::string& name,
@@ -688,7 +689,7 @@ namespace WellGroupHelpers
         }
 
         if (guideRate->has(name)) {
-            return guideRate->get(name, target, getProductionGroupRateVector(wellState, pu, name));
+            return guideRate->get(name, target, getProductionGroupRateVector(group_state, pu, name));
         }
 
         double totalGuideRate = 0.0;
@@ -927,7 +928,7 @@ namespace WellGroupHelpers
     GuideRate::RateVector FractionCalculator::getGroupRateVector(const std::string& group_name)
     {
         assert(is_producer_);
-        return getProductionGroupRateVector(this->well_state_, this->pu_, group_name);
+        return getProductionGroupRateVector(this->group_state_, this->pu_, group_name);
     }
 
 

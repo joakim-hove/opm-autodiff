@@ -1415,8 +1415,7 @@ namespace Opm {
         if (!network.active()) {
             return;
         }
-        node_pressures_ = WellGroupHelpers::computeNetworkPressures(
-                                                                    network, this->wellState(), *(vfp_properties_->getProd()), schedule(), reportStepIdx);
+        node_pressures_ = WellGroupHelpers::computeNetworkPressures(network, this->wellState(), this->group_state, *(vfp_properties_->getProd()), schedule(), reportStepIdx);
 
         // Set the thp limits of wells
         for (auto& well : well_container_) {
@@ -2512,7 +2511,6 @@ namespace Opm {
     void
     BlackoilWellModel<TypeTag>::
     actionOnBrokenConstraints(const Group& group, const Group::InjectionCMode& newControl, const Phase& controlPhase, Opm::DeferredLogger& deferred_logger) {
-        auto& well_state = this->wellState();
         auto oldControl = this->group_state.injection_control(group.name(), controlPhase);
 
         std::ostringstream ss;
@@ -3202,7 +3200,7 @@ namespace Opm {
             return grval;
         }
 
-        const auto qs = WellGroupHelpers::getProductionGroupRateVector(this->wellState(), this->phase_usage_, gname);
+        const auto qs = WellGroupHelpers::getProductionGroupRateVector(this->group_state, this->phase_usage_, gname);
 
         const auto is_inj = false; // This procedure only applies to G*PGR.
         this->getGuideRateValues(qs, is_inj, gname, grval);

@@ -265,6 +265,7 @@ namespace WellGroupHelpers
     std::map<std::string, double>
     computeNetworkPressures(const Opm::Network::ExtNetwork& network,
                             const WellStateFullyImplicitBlackoil& well_state,
+                            const GroupState& group_state,
                             const VFPProdProperties& vfp_prod_props,
                             const Schedule& schedule,
                             const int report_time_step);
@@ -273,7 +274,7 @@ namespace WellGroupHelpers
     getWellRateVector(const WellStateFullyImplicitBlackoil& well_state, const PhaseUsage& pu, const std::string& name);
 
     GuideRate::RateVector
-    getProductionGroupRateVector(const WellStateFullyImplicitBlackoil& well_state, const PhaseUsage& pu, const std::string& group_name);
+    getProductionGroupRateVector(const GroupState& group_state, const PhaseUsage& pu, const std::string& group_name);
 
     double getGuideRate(const std::string& name,
                         const Schedule& schedule,
