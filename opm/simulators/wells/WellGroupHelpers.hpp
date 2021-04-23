@@ -287,6 +287,7 @@ namespace WellGroupHelpers
     double getGuideRateInj(const std::string& name,
                            const Schedule& schedule,
                            const WellStateFullyImplicitBlackoil& wellState,
+                           const GroupState& group_state,
                            const int reportStepIdx,
                            const GuideRate* guideRate,
                            const GuideRateModel::Target target,

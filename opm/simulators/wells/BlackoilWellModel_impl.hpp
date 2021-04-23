@@ -1963,11 +1963,11 @@ namespace Opm {
             }
 
             if (cgi != GIMode::NONE) {
-                well_state.setCurrentInjectionGroupControl(Phase::GAS, group, cgi);
+                this->group_state.injection_control(group, Phase::GAS, cgi);
             }
 
             if (cwi != GIMode::NONE) {
-                well_state.setCurrentInjectionGroupControl(Phase::WATER, group, cwi);
+                this->group_state.injection_control(group, Phase::WATER, cwi);
             }
         }
     }
@@ -2253,7 +2253,7 @@ namespace Opm {
             OPM_THROW(std::runtime_error, "Unknown phase" );
 
         const auto& controls = group.injectionControls(phase, summaryState);
-        const Group::InjectionCMode& currentControl = well_state.currentInjectionGroupControl(phase, group.name());
+        auto currentControl = this->group_state.injection_control(group.name(), phase);
 
         if (controls.has_control(Group::InjectionCMode::RATE))
         {
@@ -2513,7 +2513,7 @@ namespace Opm {
     BlackoilWellModel<TypeTag>::
     actionOnBrokenConstraints(const Group& group, const Group::InjectionCMode& newControl, const Phase& controlPhase, Opm::DeferredLogger& deferred_logger) {
         auto& well_state = this->wellState();
-        const Group::InjectionCMode oldControl = well_state.currentInjectionGroupControl(controlPhase, group.name());
+        auto oldControl = this->group_state.injection_control(group.name(), controlPhase);
 
         std::ostringstream ss;
         if (oldControl != newControl) {
@@ -2521,7 +2521,7 @@ namespace Opm {
             ss << "Switching injection control mode for group "<< group.name()
                << " from " << Group::InjectionCMode2String(oldControl)
                << " to " << Group::InjectionCMode2String(newControl);
-            well_state.setCurrentInjectionGroupControl(controlPhase, group.name(), newControl);
+            this->group_state.injection_control(group.name(), controlPhase, newControl);
         }
         auto cc = Dune::MPIHelper::getCollectiveCommunication();
         if (!ss.str().empty() && cc.rank() == 0)
@@ -2594,7 +2594,7 @@ namespace Opm {
             const Phase all[] = { Phase::WATER, Phase::OIL, Phase::GAS };
             for (Phase phase : all) {
                 // Check higher up only if under individual (not FLD) control.
-                const Group::InjectionCMode& currentControl = this->wellState().currentInjectionGroupControl(phase, group.name());
+                auto currentControl = this->group_state.injection_control(group.name(), phase);
                 if (currentControl != Group::InjectionCMode::FLD && group.injectionGroupControlAvailable(phase)) {
                     const Group& parentGroup = schedule().getGroup(group.parent(), reportStepIdx);
                     const std::pair<bool, double> changed = WellGroupHelpers::checkGroupConstraintsInj(
@@ -2877,7 +2877,7 @@ namespace Opm {
         if (group.isProductionGroup())
             return;
 
-        const Group::InjectionCMode& currentGroupControl = wellState.currentInjectionGroupControl(Phase::GAS, group.name());
+        auto currentGroupControl = this->group_state.injection_control(group.name(), Phase::GAS);
         if( currentGroupControl == Group::InjectionCMode::REIN ) {
             int gasPos = phase_usage_.phase_pos[BlackoilPhases::Vapour];
             const auto& summaryState = ebosSimulator_.vanguard().summaryState();
@@ -3120,11 +3120,11 @@ namespace Opm {
             (grup_type == ::Opm::Group::GroupType::MIXED))
         {
             if (this->group_state.has_injection_control(gname, ::Opm::Phase::WATER)) {
-                cgc.currentWaterInjectionConstraint = this->wellState().currentInjectionGroupControl(::Opm::Phase::WATER, gname);
+                cgc.currentWaterInjectionConstraint = this->group_state.injection_control(gname, Phase::WATER);
             }
 
             if (this->group_state.has_injection_control(gname, ::Opm::Phase::GAS)) {
-                cgc.currentGasInjectionConstraint = this->wellState().currentInjectionGroupControl(::Opm::Phase::GAS, gname);
+                cgc.currentGasInjectionConstraint = this->group_state.injection_control(gname, Phase::GAS);
             }
         }
     }

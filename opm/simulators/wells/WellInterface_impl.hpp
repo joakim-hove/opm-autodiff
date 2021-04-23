@@ -2195,7 +2195,7 @@ namespace Opm
             assert(false);
         }
 
-        const Group::InjectionCMode& currentGroupControl = well_state.currentInjectionGroupControl(injectionPhase, group.name());
+        auto currentGroupControl = group_state.injection_control(group.name(), injectionPhase);
         if (currentGroupControl == Group::InjectionCMode::FLD ||
             currentGroupControl == Group::InjectionCMode::NONE) {
             if (!group.injectionGroupControlAvailable(injectionPhase)) {

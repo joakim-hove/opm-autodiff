@@ -73,7 +73,7 @@ namespace WellGroupHelpers
         const Phase all[] = {Phase::WATER, Phase::OIL, Phase::GAS};
         for (Phase phase : all) {
             if (!group_state.has_injection_control(group.name(), phase)) {
-                wellState.setCurrentInjectionGroupControl(phase, group.name(), Group::InjectionCMode::NONE);
+                group_state.injection_control(group.name(), phase, Group::InjectionCMode::NONE);
             }
         }
         if (!group_state.has_production_control(group.name())) {
@@ -89,7 +89,7 @@ namespace WellGroupHelpers
                     continue;
 
                 const auto& controls = group.injectionControls(phase, summaryState);
-                wellState.setCurrentInjectionGroupControl(phase, group.name(), controls.cmode);
+                group_state.injection_control(group.name(), phase, controls.cmode);
             }
         }
 
@@ -100,7 +100,7 @@ namespace WellGroupHelpers
         }
 
         if (schedule[reportStepIdx].gconsale().has(group.name())) {
-            wellState.setCurrentInjectionGroupControl(Phase::GAS, group.name(), Group::InjectionCMode::SALE);
+            group_state.injection_control(group.name(), Phase::GAS, Group::InjectionCMode::SALE);
         }
     }
 
@@ -314,7 +314,7 @@ namespace WellGroupHelpers
                 const Phase all[] = {Phase::WATER, Phase::OIL, Phase::GAS};
                 for (Phase phase : all) {
                     const Group::InjectionCMode& currentGroupControl
-                        = wellState.currentInjectionGroupControl(phase, subGroupName);
+                        = group_state.injection_control(subGroup.name(), phase);
                     int phasePos;
                     if (phase == Phase::GAS && pu.phase_used[BlackoilPhases::Vapour])
                         phasePos = pu.phase_pos[BlackoilPhases::Vapour];
@@ -724,6 +724,7 @@ namespace WellGroupHelpers
     double getGuideRateInj(const std::string& name,
                            const Schedule& schedule,
                            const WellStateFullyImplicitBlackoil& wellState,
+                           const GroupState& group_state,
                            const int reportStepIdx,
                            const GuideRate* guideRate,
                            const GuideRateModel::Target target,
@@ -743,12 +744,11 @@ namespace WellGroupHelpers
 
         for (const std::string& groupName : group.groups()) {
             const Group::InjectionCMode& currentGroupControl
-                = wellState.currentInjectionGroupControl(injectionPhase, groupName);
+                = group_state.injection_control(groupName, injectionPhase);
             if (currentGroupControl == Group::InjectionCMode::FLD
                 || currentGroupControl == Group::InjectionCMode::NONE) {
                 // accumulate from sub wells/groups
-                totalGuideRate += getGuideRateInj(
-                    groupName, schedule, wellState, reportStepIdx, guideRate, target, injectionPhase, pu);
+                totalGuideRate += getGuideRateInj(groupName, schedule, wellState, group_state, reportStepIdx, guideRate, target, injectionPhase, pu);
             }
         }
 
@@ -790,7 +790,7 @@ namespace WellGroupHelpers
                 const auto ctrl = group_state.production_control(child_group);
                 included = included || (ctrl == Group::ProductionCMode::FLD) || (ctrl == Group::ProductionCMode::NONE);
             } else {
-                const auto ctrl = well_state.currentInjectionGroupControl(injection_phase, child_group);
+                const auto ctrl = group_state.injection_control(child_group, injection_phase);
                 included = included || (ctrl == Group::InjectionCMode::FLD) || (ctrl == Group::InjectionCMode::NONE);
             }
 
@@ -873,7 +873,7 @@ namespace WellGroupHelpers
                 const auto ctrl = this->group_state_.production_control(child_group);
                 included = included || (ctrl == Group::ProductionCMode::FLD) || (ctrl == Group::ProductionCMode::NONE);
             } else {
-                const auto ctrl = well_state_.currentInjectionGroupControl(injection_phase_, child_group);
+                const auto ctrl = this->group_state_.injection_control(child_group, this->injection_phase_);
                 included = included || (ctrl == Group::InjectionCMode::FLD) || (ctrl == Group::InjectionCMode::NONE);
             }
             if (included) {
@@ -1108,7 +1108,7 @@ namespace WellGroupHelpers
         // part of. Later it is the accumulated factor including the group efficiency factor
         // of the child of group.
 
-        const Group::InjectionCMode& currentGroupControl = wellState.currentInjectionGroupControl(injectionPhase, group.name());
+        auto currentGroupControl = group_state.injection_control(group.name(), injectionPhase);
 
         if (currentGroupControl == Group::InjectionCMode::FLD || currentGroupControl == Group::InjectionCMode::NONE) {
             // Return if we are not available for parent group.

@@ -413,15 +413,6 @@ namespace Opm
         std::vector<Well::ProducerCMode>& currentProductionControls() { return current_production_controls_; }
         const std::vector<Well::ProducerCMode>& currentProductionControls() const { return current_production_controls_; }
 
-        /// One current control per group.
-        void setCurrentInjectionGroupControl(const Opm::Phase& phase, const std::string& groupName, const Group::InjectionCMode& groupControl ) {
-            this->group_state.injection_control(groupName, phase, groupControl);
-        }
-
-        Group::InjectionCMode currentInjectionGroupControl(const Opm::Phase& phase, const std::string& groupName) const {
-            return this->group_state.injection_control(groupName, phase);
-        }
-
         void setCurrentWellRates(const std::string& wellName, const std::vector<double>& rates ) {
             well_rates[wellName].second = rates;
         }
