@@ -515,12 +515,13 @@ namespace WellGroupHelpers
                              const PhaseUsage& pu,
                              const SummaryState& st,
                              const WellStateFullyImplicitBlackoil& wellStateNupcol,
-                             WellStateFullyImplicitBlackoil& wellState)
+                             WellStateFullyImplicitBlackoil& wellState,
+                             GroupState& group_state)
     {
         const int np = wellState.numPhases();
         for (const std::string& groupName : group.groups()) {
             const Group& groupTmp = schedule.getGroup(groupName, reportStepIdx);
-            updateREINForGroups(groupTmp, schedule, reportStepIdx, pu, st, wellStateNupcol, wellState);
+            updateREINForGroups(groupTmp, schedule, reportStepIdx, pu, st, wellStateNupcol, wellState, group_state);
         }
 
         std::vector<double> rein(np, 0.0);
@@ -538,7 +539,7 @@ namespace WellGroupHelpers
             }
         }
 
-        wellState.setCurrentInjectionREINRates(group.name(), rein);
+        group_state.update_injection_rein_rates(group.name(), rein);
     }
 
 

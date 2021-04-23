@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        void setCurrentInjectionREINRates(const std::string& groupName, const std::vector<double>& target ) {
-            this->group_state.update_injection_rein_rates(groupName, target);
-        }
-
         const std::vector<double>& currentInjectionREINRates(const std::string& groupName) const {
             return this->group_state.injection_rein_rates(groupName);
         }
