@@ -411,11 +411,12 @@ namespace WellGroupHelpers
                              const Schedule& schedule,
                              const int reportStepIdx,
                              const WellStateFullyImplicitBlackoil& wellStateNupcol,
-                             WellStateFullyImplicitBlackoil& wellState)
+                             WellStateFullyImplicitBlackoil& wellState,
+                             GroupState& group_state)
     {
         for (const std::string& groupName : group.groups()) {
             const Group& groupTmp = schedule.getGroup(groupName, reportStepIdx);
-            updateVREPForGroups(groupTmp, schedule, reportStepIdx, wellStateNupcol, wellState);
+            updateVREPForGroups(groupTmp, schedule, reportStepIdx, wellStateNupcol, wellState, group_state);
         }
         const int np = wellState.numPhases();
         double resv = 0.0;
@@ -428,7 +429,7 @@ namespace WellGroupHelpers
                                       phase,
                                       /*isInjector*/ false);
         }
-        wellState.setCurrentInjectionVREPRates(group.name(), resv);
+        group_state.update_injection_vrep_rate(group.name(), resv);
     }
 
     void updateReservoirRatesInjectionGroups(const Group& group,

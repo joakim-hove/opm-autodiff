@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        void setCurrentInjectionVREPRates(const std::string& groupName, const double& target ) {
-            this->group_state.update_injection_vrep_rate(groupName, target);
-        }
-
         double currentInjectionVREPRates(const std::string& groupName) const {
             return this->group_state.injection_vrep_rate(groupName);
         }
