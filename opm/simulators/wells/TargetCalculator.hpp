@@ -228,7 +228,7 @@ namespace WellGroupHelpers
             case Group::InjectionCMode::RESV:
                 return ctrl.resv_max_rate;
             case Group::InjectionCMode::REIN: {
-                double production_rate = well_state_.currentInjectionREINRates(ctrl.reinj_group)[pos_];
+                double production_rate = this->group_state_.injection_rein_rates(ctrl.reinj_group)[pos_];
                 return ctrl.target_reinj_fraction * production_rate;
             }
             case Group::InjectionCMode::VREP: {
@@ -251,7 +251,7 @@ namespace WellGroupHelpers
                 assert(pos_ == pu_.phase_pos[BlackoilPhases::Vapour]);
                 // Gas injection rate = Total gas production rate + gas import rate - gas consumption rate - sales rate;
                 // Gas import and consumption is already included in the REIN rates
-                double inj_rate = well_state_.currentInjectionREINRates(group_name_)[pos_];
+                double inj_rate = group_state_.injection_rein_rates(this->group_name_)[pos_];
                 inj_rate -= sales_target_;
                 return inj_rate;
             }
