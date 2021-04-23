@@ -2422,7 +2422,7 @@ namespace Opm {
                 ss << "Maximum GCONSALE limit violated for " << group.name() << ". The group is switched from ";
                 ss << Group::ProductionCMode2String(oldProductionControl) << " to " << Group::ProductionCMode2String(Group::ProductionCMode::GRAT);
                 ss << " and limited by the maximum sales rate after consumption and import are considered" ;
-                well_state.setCurrentGroupGratTargetFromSales(group.name(), production_target);
+                this->group_state.update_grat_sales_target(group.name(), production_target);
                 break;
             }
             default:
@@ -2434,7 +2434,7 @@ namespace Opm {
             if ( currentProductionControl == Group::ProductionCMode::GRAT ) {
                 ss << "Group " + group.name() + " has sale rate less then minimum permitted value and is under GRAT control. \n";
                 ss << "The GRAT is increased to meet the sales minimum rate. \n";
-                well_state.setCurrentGroupGratTargetFromSales(group.name(), production_target);
+                this->group_state.update_grat_sales_target(group.name(), production_target);
             //} else if () {//TODO add action for WGASPROD
             //} else if () {//TODO add action for drilling queue
             } else {
