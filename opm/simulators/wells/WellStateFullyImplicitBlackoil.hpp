@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        double currentGroupGratTargetFromSales(const std::string& groupName) const {
-            return this->group_state.grat_sales_target(groupName);
-        }
-
         void setCurrentGroupInjectionPotentials(const std::string& groupName, const std::vector<double>& pot ) {
             this->group_state.update_injection_potentials(groupName, pot);
         }

@@ -2335,7 +2335,7 @@ namespace Opm
         // the adjusted rates is send to the targetCalculator
         double gratTargetFromSales = 0.0;
         if (group_state.has_grat_sales_target(group.name()))
-            gratTargetFromSales = well_state.currentGroupGratTargetFromSales(group.name());
+            gratTargetFromSales = group_state.grat_sales_target(group.name());
 
         WellGroupHelpers::TargetCalculator tcalc(currentGroupControl, pu, resv_coeff, gratTargetFromSales);
         WellGroupHelpers::FractionCalculator fcalc(schedule, summaryState, well_state, group_state, current_step_, guide_rate_, tcalc.guideTargetMode(), pu, true, Phase::OIL);
