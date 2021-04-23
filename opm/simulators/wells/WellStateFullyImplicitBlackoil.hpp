@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        void setCurrentInjectionGroupReductionRates(const std::string& groupName, const std::vector<double>& target ) {
-            this->group_state.update_injection_reduction_rates(groupName, target);
-        }
-
         const std::vector<double>& currentInjectionGroupReductionRates(const std::string& groupName) const {
             return this->group_state.injection_reduction_rates(groupName);
         }

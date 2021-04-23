@@ -401,7 +401,7 @@ namespace WellGroupHelpers
             elem *= groupEfficiency;
         }
         if (isInjector)
-            wellState.setCurrentInjectionGroupReductionRates(group.name(), groupTargetReduction);
+            group_state.update_injection_reduction_rates(group.name(), groupTargetReduction);
         else
             group_state.update_production_reduction_rates(group.name(), groupTargetReduction);
     }
