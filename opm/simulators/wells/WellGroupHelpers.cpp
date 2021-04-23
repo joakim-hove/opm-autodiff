@@ -253,12 +253,12 @@ namespace WellGroupHelpers
                 break;
             case Group::GuideRateInjTarget::VOID:
             {
-                guideRateValue = wellState.currentInjectionVREPRates(group.name());
+                guideRateValue = group_state.injection_vrep_rate(group.name());
                 break;
             }
             case Group::GuideRateInjTarget::NETV:
             {
-                guideRateValue = wellState.currentInjectionVREPRates(group.name());
+                guideRateValue = group_state.injection_vrep_rate(group.name());
                 const std::vector<double>& injRES = group_state.injection_reservoir_rates(group.name());
                 if (phase != Phase::OIL && pu.phase_used[BlackoilPhases::Liquid])
                     guideRateValue -= injRES[pu.phase_pos[BlackoilPhases::Liquid]];

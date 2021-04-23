@@ -233,8 +233,7 @@ namespace WellGroupHelpers
             }
             case Group::InjectionCMode::VREP: {
                 const std::vector<double>& group_injection_reductions = this->group_state_.injection_reduction_rates(this->group_name_);
-                double voidage_rate
-                        = well_state_.currentInjectionVREPRates(ctrl.voidage_group) * ctrl.target_void_fraction;
+                double voidage_rate = group_state_.injection_vrep_rate(ctrl.voidage_group) * ctrl.target_void_fraction;
                 double inj_reduction = 0.0;
                 if (ctrl.phase != Phase::WATER)
                     inj_reduction += group_injection_reductions[pu_.phase_pos[BlackoilPhases::Aqua]]
