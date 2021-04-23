@@ -2345,7 +2345,7 @@ namespace Opm
         };
 
         auto localReduction = [&](const std::string& group_name) {
-            const std::vector<double>& groupTargetReductions = well_state.currentProductionGroupReductionRates(group_name);
+            const std::vector<double>& groupTargetReductions = group_state.production_reduction_rates(group_name);
             return tcalc.calcModeRateFromRates(groupTargetReductions);
         };
 

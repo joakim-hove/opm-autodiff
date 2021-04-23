@@ -1030,8 +1030,7 @@ namespace WellGroupHelpers
         auto localFraction = [&](const std::string& child) { return fcalc.localFraction(child, name); };
 
         auto localReduction = [&](const std::string& group_name) {
-            const std::vector<double>& groupTargetReductions
-                = wellState.currentProductionGroupReductionRates(group_name);
+            const std::vector<double>& groupTargetReductions = group_state.production_reduction_rates(group_name);
             return tcalc.calcModeRateFromRates(groupTargetReductions);
         };
 
