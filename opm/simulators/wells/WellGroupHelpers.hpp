@@ -226,6 +226,7 @@ namespace WellGroupHelpers
                                             const Opm::PhaseUsage& pu,
                                             const int reportStepIdx,
                                             const WellStateFullyImplicitBlackoil& wellState,
+                                            const GroupState& group_state,
                                             GuideRate* guideRate,
                                             Opm::DeferredLogger& deferred_logger);
 

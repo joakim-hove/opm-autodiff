@@ -232,13 +232,13 @@ namespace WellGroupHelpers
                                             const Opm::PhaseUsage& pu,
                                             const int reportStepIdx,
                                             const WellStateFullyImplicitBlackoil& wellState,
+                                            const GroupState& group_state,
                                             GuideRate* guideRate,
                                             Opm::DeferredLogger& deferred_logger)
     {
         for (const std::string& groupName : group.groups()) {
             const Group& groupTmp = schedule.getGroup(groupName, reportStepIdx);
-            updateGuideRatesForInjectionGroups(
-                        groupTmp, schedule, summaryState, pu, reportStepIdx, wellState, guideRate, deferred_logger);
+            updateGuideRatesForInjectionGroups(groupTmp, schedule, summaryState, pu, reportStepIdx, wellState, group_state, guideRate, deferred_logger);
         }
         const Phase all[] = {Phase::WATER, Phase::OIL, Phase::GAS};
         for (Phase phase : all) {
@@ -259,7 +259,7 @@ namespace WellGroupHelpers
             case Group::GuideRateInjTarget::NETV:
             {
                 guideRateValue = wellState.currentInjectionVREPRates(group.name());
-                const std::vector<double>& injRES = wellState.currentInjectionGroupReservoirRates(group.name());
+                const std::vector<double>& injRES = group_state.injection_reservoir_rates(group.name());
                 if (phase != Phase::OIL && pu.phase_used[BlackoilPhases::Liquid])
                     guideRateValue -= injRES[pu.phase_pos[BlackoilPhases::Liquid]];
                 if (phase != Phase::GAS && pu.phase_used[BlackoilPhases::Vapour])

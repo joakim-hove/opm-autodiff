@@ -395,7 +395,7 @@ namespace Opm {
         std::vector<double> pot(numPhases(), 0.0);
         const Group& fieldGroup = schedule().getGroup("FIELD", reportStepIdx);
         WellGroupHelpers::updateGuideRateForProductionGroups(fieldGroup, schedule(), phase_usage_, reportStepIdx, simulationTime, this->wellState(), this->group_state, comm, guideRate_.get(), pot);
-        WellGroupHelpers::updateGuideRatesForInjectionGroups(fieldGroup, schedule(), summaryState, phase_usage_, reportStepIdx, this->wellState(), guideRate_.get(), local_deferredLogger);
+        WellGroupHelpers::updateGuideRatesForInjectionGroups(fieldGroup, schedule(), summaryState, phase_usage_, reportStepIdx, this->wellState(), this->group_state, guideRate_.get(), local_deferredLogger);
         WellGroupHelpers::updateGuideRatesForWells(schedule(), phase_usage_, reportStepIdx, simulationTime, this->wellState(), comm, guideRate_.get());
 
         try {
