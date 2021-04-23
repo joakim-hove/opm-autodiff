@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        void setCurrentProductionGroupReductionRates(const std::string& groupName, const std::vector<double>& target ) {
-            this->group_state.update_production_reduction_rates(groupName, target);
-        }
-
         const std::vector<double>& currentProductionGroupReductionRates(const std::string& groupName) const {
             return this->group_state.production_reduction_rates(groupName);
         }

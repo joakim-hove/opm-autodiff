@@ -94,7 +94,7 @@ namespace WellGroupHelpers
                                     const GuideRate& guide_rate,
                                     const WellStateFullyImplicitBlackoil& wellStateNupcol,
                                     WellStateFullyImplicitBlackoil& wellState,
-                                    const GroupState& group_state,
+                                    GroupState& group_state,
                                     std::vector<double>& groupTargetReduction);
 
     template <class Comm>

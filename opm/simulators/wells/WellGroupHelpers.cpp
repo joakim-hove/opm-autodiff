@@ -291,7 +291,7 @@ namespace WellGroupHelpers
                                     const GuideRate& guide_rate,
                                     const WellStateFullyImplicitBlackoil& wellStateNupcol,
                                     WellStateFullyImplicitBlackoil& wellState,
-                                    const GroupState& group_state,
+                                    GroupState& group_state,
                                     std::vector<double>& groupTargetReduction)
     {
         const int np = wellState.numPhases();
@@ -403,7 +403,7 @@ namespace WellGroupHelpers
         if (isInjector)
             wellState.setCurrentInjectionGroupReductionRates(group.name(), groupTargetReduction);
         else
-            wellState.setCurrentProductionGroupReductionRates(group.name(), groupTargetReduction);
+            group_state.update_production_reduction_rates(group.name(), groupTargetReduction);
     }
 
 
