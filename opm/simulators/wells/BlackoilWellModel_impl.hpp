@@ -3188,7 +3188,7 @@ namespace Opm {
 
         const auto& gname = group.name();
 
-        if ( ! this->wellState().hasProductionGroupRates(gname)) {
+        if ( ! this->group_state.has_production_rates(gname)) {
             // No flow rates for production group 'gname' -- might be before group comes
             // online (e.g., for the initial condition before simulation
             // starts).

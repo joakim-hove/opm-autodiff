@@ -431,10 +431,6 @@ namespace Opm
         }
 
 
-        bool hasProductionGroupRates(const std::string& groupName) const {
-            return this->group_state.has_production_rates(groupName);
-        }
-
 
         void setCurrentProductionGroupReductionRates(const std::string& groupName, const std::vector<double>& target ) {
             this->group_state.update_production_reduction_rates(groupName, target);
