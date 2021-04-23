@@ -1024,7 +1024,7 @@ namespace WellGroupHelpers
         // gconsale may adjust the grat target.
         // the adjusted rates is send to the targetCalculator
         double gratTargetFromSales = 0.0;
-        if (wellState.hasGroupGratTargetFromSales(group.name()))
+        if (group_state.has_grat_sales_target(group.name()))
             gratTargetFromSales = wellState.currentGroupGratTargetFromSales(group.name());
 
         TargetCalculator tcalc(currentGroupControl, pu, resv_coeff, gratTargetFromSales);

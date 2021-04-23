@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        bool hasGroupGratTargetFromSales(const std::string& groupName) const {
-            return this->group_state.has_grat_sales_target(groupName);
-        }
-
         double currentGroupGratTargetFromSales(const std::string& groupName) const {
             return this->group_state.grat_sales_target(groupName);
         }

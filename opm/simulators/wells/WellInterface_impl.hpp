@@ -2334,7 +2334,7 @@ namespace Opm
         // gconsale may adjust the grat target.
         // the adjusted rates is send to the targetCalculator
         double gratTargetFromSales = 0.0;
-        if (well_state.hasGroupGratTargetFromSales(group.name()))
+        if (group_state.has_grat_sales_target(group.name()))
             gratTargetFromSales = well_state.currentGroupGratTargetFromSales(group.name());
 
         WellGroupHelpers::TargetCalculator tcalc(currentGroupControl, pu, resv_coeff, gratTargetFromSales);
