@@ -1148,14 +1148,13 @@ namespace WellGroupHelpers
             const auto& gconsale = schedule[reportStepIdx].gconsale().get(group.name(), summaryState);
             sales_target = gconsale.sales_target;
         }
-        InjectionTargetCalculator tcalc(currentGroupControl, pu, resv_coeff, group.name(), sales_target, wellState, injectionPhase, deferred_logger);
+        InjectionTargetCalculator tcalc(currentGroupControl, pu, resv_coeff, group.name(), sales_target, wellState, group_state, injectionPhase, deferred_logger);
         FractionCalculator fcalc(schedule, summaryState, wellState, group_state, reportStepIdx, guideRate, tcalc.guideTargetMode(), pu, false, injectionPhase);
 
         auto localFraction = [&](const std::string& child) { return fcalc.localFraction(child, name); };
 
         auto localReduction = [&](const std::string& group_name) {
-            const std::vector<double>& groupTargetReductions
-                = wellState.currentInjectionGroupReductionRates(group_name);
+            const std::vector<double>& groupTargetReductions = group_state.injection_reduction_rates(group_name);
             return tcalc.calcModeRateFromRates(groupTargetReductions);
         };
 
