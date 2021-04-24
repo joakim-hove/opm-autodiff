@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        void setCurrentGroupInjectionPotentials(const std::string& groupName, const std::vector<double>& pot ) {
-            this->group_state.update_injection_potentials(groupName, pot);
-        }
-
         const std::vector<double>& currentGroupInjectionPotentials(const std::string& groupName) const {
             return this->group_state.injection_potentials(groupName);
         }
