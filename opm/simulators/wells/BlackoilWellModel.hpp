@@ -578,7 +578,7 @@ namespace Opm {
                                const data::GroupAndNetworkValues& grpNwrkValues,
                                const PhaseUsage& phases,
                                const bool handle_ms_well,
-                               WellStateFullyImplicitBlackoil& state ) const;
+                               WellStateFullyImplicitBlackoil& state );
 
             // whether there exists any multisegment well open on this process
             bool anyMSWellOpenLocal() const;
@@ -643,7 +643,7 @@ namespace Opm {
             WellState last_valid_well_state_;
             WellState nupcol_well_state_;
 
-            GroupState& group_state;
+            GroupState group_state;
         };
 
 

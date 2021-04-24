@@ -22,7 +22,6 @@
 #define OPM_WELLSTATEFULLYIMPLICITBLACKOIL_HEADER_INCLUDED
 
 #include <opm/simulators/wells/WellState.hpp>
-#include <opm/simulators/wells/GroupState.hpp>
 #include <opm/core/props/BlackoilPhases.hpp>
 
 #include <opm/parser/eclipse/EclipseState/Schedule/Schedule.hpp>
@@ -70,8 +69,7 @@ namespace Opm
         using BaseType :: updateStatus;
 
         explicit WellStateFullyImplicitBlackoil(int num_phases) :
-            WellState(num_phases),
-            group_state(num_phases)
+            WellState(num_phases)
         {}
 
 
@@ -1050,8 +1048,6 @@ namespace Opm
                 x.second = data[pos++];
             }
             assert(pos == sz);
-
-            this->group_state.communicate_rates(comm);
         }
 
         template<class Comm>
@@ -1204,15 +1200,6 @@ namespace Opm
             return it->first;
         }
 
-        GroupState& groupState()  {
-            return this->group_state;
-        }
-
-        const GroupState& groupState() const {
-            return this->group_state;
-        }
-
-
     private:
         std::vector<double> perfphaserates_;
         std::vector<bool> is_producer_; // Size equal to number of local wells.
@@ -1229,8 +1216,6 @@ namespace Opm
         std::vector<int> globalIsProductionGrup_;
         std::map<std::string, int> wellNameToGlobalIdx_;
         std::map<std::string, std::pair<bool, std::vector<double>>> well_rates;
-
-        GroupState group_state;
 
         std::map<std::string, double> current_alq_;
         std::map<std::string, double> default_alq_;

@@ -38,7 +38,7 @@ namespace Opm {
           active_well_state_(phase_usage_.num_phases),
           last_valid_well_state_(phase_usage_.num_phases),
           nupcol_well_state_(phase_usage_.num_phases),
-          group_state(active_well_state_.groupState())
+          group_state(phase_usage_.num_phases)
     {
         terminal_output_ = false;
         if (ebosSimulator.gridView().comm().rank() == 0)
@@ -1484,7 +1484,7 @@ namespace Opm {
         }
 
         well_state.communicateGroupRates(comm);
-
+        this->group_state.communicate_rates(comm);
         // compute wsolvent fraction for REIN wells
         updateWsolvent(fieldGroup, schedule(), reportStepIdx,  well_state_nupcol);
 
@@ -1870,7 +1870,7 @@ namespace Opm {
                      const data::GroupAndNetworkValues& grpNwrkValues,
                      const PhaseUsage& phases,
                      const bool handle_ms_well,
-                     WellStateFullyImplicitBlackoil& well_state) const
+                     WellStateFullyImplicitBlackoil& well_state) 
     {
         using GPMode = Group::ProductionCMode;
         using GIMode = Group::InjectionCMode;
