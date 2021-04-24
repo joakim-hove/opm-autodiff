@@ -432,10 +432,6 @@ namespace Opm
 
 
 
-        const std::vector<double>& currentGroupInjectionPotentials(const std::string& groupName) const {
-            return this->group_state.injection_potentials(groupName);
-        }
-
         data::Wells
         report(const PhaseUsage &pu,
                const int* globalCellIdxMap,
