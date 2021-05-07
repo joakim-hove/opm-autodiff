@@ -289,17 +289,19 @@ namespace Opm
                         // number of perforations.
                         if (global_num_perf_same)
                         {
-                            int old_perf_phase_idx = oldPerf_idx_beg *np;
-                            for (int perf_phase_idx = connpos*np;
-                                 perf_phase_idx < (connpos + num_perf_this_well)*np; ++perf_phase_idx, ++old_perf_phase_idx )
-                            {
-                                mutable_perfPhaseRates()[ perf_phase_idx ] = prevState->perfPhaseRates()[ old_perf_phase_idx ];
+                            const auto * src_rates = &prevState->perfPhaseRates()[oldPerf_idx_beg* np];
+                            auto * target_rates = &this->mutable_perfPhaseRates()[connpos*np];
+                            for (int perf_index = 0; perf_index < num_perf_this_well; perf_index++) {
+                                for (int p = 0; p < np; p++) {
+                                    target_rates[perf_index*np + p] = src_rates[perf_index*np + p];
+                                }
                             }
                         } else {
                             const int global_num_perf_this_well = parallel_well_info[w]->communication().sum(num_perf_this_well);
-                            for (int perf = connpos; perf < connpos + num_perf_this_well; ++perf) {
+                            auto * target_rates = &this->mutable_perfPhaseRates()[connpos*np];
+                            for (int perf_index = 0; perf_index < num_perf_this_well; perf_index++) {
                                 for (int p = 0; p < np; ++p) {
-                                    mutable_perfPhaseRates()[np*perf + p] = wellRates()[np*newIndex + p] / double(global_num_perf_this_well);
+                                    target_rates[perf_index*np + p] = wellRates()[np*newIndex + p] / double(global_num_perf_this_well);
                                 }
                             }
                         }
@@ -308,9 +310,11 @@ namespace Opm
                         if (global_num_perf_same)
                         {
                             int oldPerf_idx = oldPerf_idx_beg;
-                            for (int perf = connpos; perf < connpos + num_perf_this_well; ++perf, ++oldPerf_idx )
+                            auto * target_press = &perfPress()[connpos];
+                            const auto * src_press = &prevState->perfPress()[oldPerf_idx_beg];
+                            for (int perf = 0; perf < num_perf_this_well; ++perf)
                             {
-                                perfPress()[ perf ] = prevState->perfPress()[ oldPerf_idx ];
+                                target_press[perf] = src_press[perf];
                             }
                         }
 
@@ -682,20 +686,19 @@ namespace Opm
                         assert(n_activeperf == (start_perf_next_well - start_perf));
 
                         if (pu.phase_used[Gas]) {
+                            auto * perf_rates = &this->mutable_perfPhaseRates()[np * start_perf];
                             const int gaspos = pu.phase_pos[Gas];
                             // scale the phase rates for Gas to avoid too bad initial guess for gas fraction
                             // it will probably benefit the standard well too, while it needs to be justified
                             // TODO: to see if this strategy can benefit StandardWell too
                             // TODO: it might cause big problem for gas rate control or if there is a gas rate limit
                             // maybe the best way is to initialize the fractions first then get the rates
-                            for (int perf = 0; perf < n_activeperf; perf++) {
-                                const int perf_pos = start_perf + perf;
-                                mutable_perfPhaseRates()[np * perf_pos + gaspos] *= 100.;
-                            }
+                            for (int perf = 0; perf < n_activeperf; perf++)
+                                perf_rates[perf*np + gaspos] *= 100;
                         }
 
-                        const std::vector<double> perforation_rates(perfPhaseRates().begin() + np * start_perf,
-                                                                    perfPhaseRates().begin() + np * start_perf_next_well); // the perforation rates for this well
+                        const auto * perf_rates = &perfPhaseRates()[np*start_perf];
+                        std::vector<double> perforation_rates(perf_rates, perf_rates + num_perf_this_well);
                         std::vector<double> segment_rates;
                         calculateSegmentRates(segment_inlets, segment_perforations, perforation_rates, np, 0 /* top segment */, segment_rates);
                         std::copy(segment_rates.begin(), segment_rates.end(), std::back_inserter(seg_rates_));
@@ -711,10 +714,11 @@ namespace Opm
                         seg_press_.push_back(bhp()[w]);
                         const int top_segment = top_segment_index_[w];
                         const int start_perf = connpos;
+                        const auto * perf_press = &this->perfPress()[start_perf];
                         for (int seg = 1; seg < well_nseg; ++seg) {
                             if ( !segment_perforations[seg].empty() ) {
                                 const int first_perf = segment_perforations[seg][0];
-                                seg_press_.push_back(perfPress()[start_perf + first_perf]);
+                                seg_press_.push_back(perf_press[first_perf]);
                             } else {
                                 // seg_press_.push_back(bhp); // may not be a good decision
                                 // using the outlet segment pressure // it needs the ordering is correct
