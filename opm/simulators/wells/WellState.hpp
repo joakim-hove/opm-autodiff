@@ -26,6 +26,7 @@
 #include <opm/parser/eclipse/EclipseState/Schedule/Well/Well.hpp>
 #include <opm/simulators/wells/PerforationData.hpp>
 #include <opm/simulators/wells/ParallelWellInfo.hpp>
+#include <opm/simulators/wells/WellContainer.hpp>
 
 #include <array>
 #include <cassert>
@@ -69,13 +70,14 @@ namespace Opm
 
             well_perf_data_ = well_perf_data;
             parallel_well_info_ = parallel_well_info;
-
+            perfpress_.clear();
+            perfrates_.clear();
+            status_.clear();
             {
                 // const int nw = wells->number_of_wells;
                 const int nw = wells_ecl.size();
                 const int np = this->phase_usage_.num_phases;
                 // const int np = wells->number_of_phases;
-                status_.assign(nw, Well::Status::OPEN);
                 bhp_.resize(nw, 0.0);
                 thp_.resize(nw, 0.0);
                 temperature_.resize(nw, 273.15 + 15.56); // standard condition temperature
@@ -97,12 +99,6 @@ namespace Opm
                     wellMapEntry[ 2 ] = num_perf_this_well;
                     connpos += num_perf_this_well;
                 }
-
-                // The perforation rates and perforation pressures are
-                // not expected to be consistent with bhp_ and wellrates_
-                // after init().
-                perfrates_.resize(connpos, 0.0);
-                perfpress_.resize(connpos, -1e100);
             }
         }
 
@@ -171,12 +167,16 @@ namespace Opm
         const std::vector<double>& wellRates() const { return wellrates_; }
 
         /// One rate per well connection.
-        std::vector<double>& perfRates() { return perfrates_; }
-        const std::vector<double>& perfRates() const { return perfrates_; }
+        std::vector<double>& perfRates(std::size_t well_index) { return perfrates_[well_index]; }
+        const std::vector<double>& perfRates(std::size_t well_index) const { return perfrates_[well_index]; }
+        std::vector<double>& perfRates(const std::string& wname) { return perfrates_[wname]; }
+        const std::vector<double>& perfRates(const std::string& wname) const { return perfrates_[wname]; }
 
         /// One pressure per well connection.
-        std::vector<double>& perfPress() { return perfpress_; }
-        const std::vector<double>& perfPress() const { return perfpress_; }
+        std::vector<double>& perfPress(std::size_t well_index) { return perfpress_[well_index]; }
+        const std::vector<double>& perfPress(std::size_t well_index) const { return perfpress_[well_index]; }
+        std::vector<double>& perfPress(const std::string& wname) { return perfpress_[wname]; }
+        const std::vector<double>& perfPress(const std::string& wname) const { return perfpress_[wname]; }
 
         const WellMapType& wellMap() const { return wellMap_; }
         WellMapType& wellMap() { return wellMap_; }
@@ -322,8 +322,8 @@ namespace Opm
             const int num_perf_well = pd.size();
             well.connections.resize(num_perf_well);
 
-            const auto * perf_rates = &this->perfRates()[itr.second[1]];
-            const auto * perf_pressure = &this->perfPress()[itr.second[1]];
+            const auto& perf_rates = this->perfRates(well_index);
+            auto&  perf_pressure = this->perfpress_[well_index];
             for( int i = 0; i < num_perf_well; ++i ) {
                 const auto active_index = this->well_perf_data_[well_index][i].cell_index;
                 auto& connection = well.connections[ i ];
@@ -345,10 +345,10 @@ namespace Opm
         std::vector<double> thp_;
         std::vector<double> temperature_;
         std::vector<double> wellrates_;
-        std::vector<double> perfrates_;
-        std::vector<double> perfpress_;
+        WellContainer<std::vector<double>> perfrates_;
+        WellContainer<std::vector<double>> perfpress_;
     protected:
-        std::vector<Well::Status> status_;
+        WellContainer<Well::Status> status_;
     private:
 
         WellMapType wellMap_;
@@ -398,8 +398,11 @@ namespace Opm
             if ( well.isInjector() ) { 
                 temperature_[w] = well.injectionControls(summary_state).temperature;
             }
+            this->status_.add(well.name(), Well::Status::OPEN);
 
             const int num_perf_this_well = well_info.communication().sum(well_perf_data_[w].size());
+            this->perfpress_.add(well.name(), std::vector<double>(num_perf_this_well, -1e100));
+            this->perfrates_.add(well.name(), std::vector<double>(num_perf_this_well, 0));
             if ( num_perf_this_well == 0 ) {
                 // No perforations of the well. Initialize to zero.
                 bhp_[w] = 0.;
