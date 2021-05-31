@@ -168,16 +168,14 @@ namespace {
 
         for (auto wellID = 0*nWell; wellID < nWell; ++wellID) {
             const auto& well     = wells[wellID];
-            const auto  pressTop = 100.0 * wellID;
-
-            auto& segments = wstate.segments(wellID);
-
-            segments.pressure[0] = pressTop;
-
             if (! well.isMultiSegment()) {
                 continue;
             }
             segments.pressure[0] = pressTop;
+
+            const auto  pressTop = 100.0 * wellID;
+            auto* press = wstate.segPress(wellID);
+            press[0] = pressTop;
 
             const auto& segSet = well.getSegments();
             const auto  nSeg   = segSet.size();
@@ -211,16 +209,16 @@ namespace {
 
         for (auto wellID = 0*nWell; wellID < nWell; ++wellID) {
             const auto& well     = wells[wellID];
-            const auto  rateTop  = 1000.0 * wellID;
             if (! well.isMultiSegment()) {
                 continue;
             }
 
-            auto& segments = wstate.segments(wellID);
+            const auto  rateTop  = 1000.0 * wellID;
+            auto segRates = wstate.segRates(wellID);
 
-            if (wat) { segments.rates[iw] = rateTop; }
-            if (oil) { segments.rates[io] = rateTop; }
-            if (gas) { segments.rates[ig] = rateTop; }
+            if (wat) { segRates[iw] = rateTop; }
+            if (oil) { segRates[io] = rateTop; }
+            if (gas) { segRates[ig] = rateTop; }
 
             const auto& segSet = well.getSegments();
             const auto  nSeg   = segSet.size();
